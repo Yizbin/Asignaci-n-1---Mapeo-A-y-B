@@ -1,0 +1,52 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum EstadoOrden {
+  abierta
+  en_proceso
+  entregada
+  cancelada
+}
+
+model Cliente {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  telefono  String
+  correo    String     @unique
+  vehiculos Vehiculo[]
+}
+
+model Vehiculo {
+  id              Int             @id @default(autoincrement())
+  placa           String          @unique
+  marca           String
+  modelo          String
+  anio            Int
+  clienteId       Int
+  cliente         Cliente         @relation(fields: [clienteId], references: [id])
+  ordenesServicio OrdenServicio[]
+}
+
+model OrdenServicio {
+  id           Int          @id @default(autoincrement())
+  descripcion  String
+  fechaIngreso DateTime     @default(now())
+  estado       EstadoOrden
+  vehiculoId   Int
+  vehiculo     Vehiculo     @relation(fields: [vehiculoId], references: [id])
+  refacciones  Refaccion[]
+}
+
+model Refaccion {
+  id              Int           @id @default(autoincrement())
+  nombre          String
+  precio          Float
+  ordenServicioId Int
+  ordenServicio   OrdenServicio @relation(fields: [ordenServicioId], references: [id])
+}
